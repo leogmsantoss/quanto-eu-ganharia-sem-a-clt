@@ -271,6 +271,8 @@ export default function App() {
                 Valores brutos. Não consideramos INSS/IR do CLT, multa de 40% do FGTS, aviso prévio, seguro-desemprego
                 nem feriados. Na CLT seu valor/hora efetivo é {brl(r.valorHoraCLT)}, já que as férias são pagas.
               </p>
+
+              {r.horasExtrasMes > 0.05 && <Compartilhar horas={`${num(r.horasExtrasMes)} horas por mês`} />}
             </>
           )}
         </section>
@@ -280,6 +282,62 @@ export default function App() {
         <p>Simulação educativa — não substitui a orientação de um contador.</p>
         <p>Ajude a manter o site de pé. Pix: 1afb988e-db09-46af-a550-f14ff8eff962</p>
       </footer>
+    </div>
+  );
+}
+
+function Compartilhar({ horas }) {
+  const [copiado, setCopiado] = useState(false);
+  const texto =
+    `Sem a CLT eu precisaria trabalhar ${horas} a mais para ganhar o mesmo que recebo hoje + benefícios. ` +
+    'Quer simular também? Acesse quantoeuganhariasemaclt.site e não vote em quem quer tirar os seus direitos!';
+  const t = encodeURIComponent(texto);
+  const podeCompartilhar = typeof navigator !== 'undefined' && !!navigator.share;
+
+  const compartilhar = () => navigator.share({ text: texto }).catch(() => {});
+  const copiar = async () => {
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      window.prompt('Copie o texto:', texto);
+    }
+  };
+
+  return (
+    <div className="share">
+      <h3>Compartilhe seu resultado</h3>
+      <p className="share-text">{texto}</p>
+      <div className="share-buttons">
+        {podeCompartilhar && (
+          <button type="button" className="share-btn primary" onClick={compartilhar}>
+            Compartilhar
+          </button>
+        )}
+        <a className="share-btn" href={`https://wa.me/?text=${t}`} target="_blank" rel="noopener noreferrer">
+          WhatsApp
+        </a>
+        <a
+          className="share-btn"
+          href={`https://twitter.com/intent/tweet?text=${t}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          X / Twitter
+        </a>
+        <a
+          className="share-btn"
+          href={`https://www.threads.net/intent/post?text=${t}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Threads
+        </a>
+        <button type="button" className="share-btn" onClick={copiar}>
+          {copiado ? 'Copiado!' : 'Copiar texto'}
+        </button>
+      </div>
     </div>
   );
 }
